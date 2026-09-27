@@ -1,9 +1,5 @@
-import Viewer from "@/components/Viewer";
+import Editor from "@/components/Editor";
 
 export default function Home() {
-  return (
-    <main className="h-screen w-screen">
-      <Viewer />
-    </main>
-  );
+  return <Editor />;
 }
