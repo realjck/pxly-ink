@@ -15,6 +15,7 @@ function toStencils(files: FileList): Stencil[] {
       id: crypto.randomUUID(),
       name: file.name,
       url: URL.createObjectURL(file),
+      projection: false,
     }));
 }
 
