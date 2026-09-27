@@ -62,6 +62,7 @@ export default function Viewer({ stencils, activeId, onPlace }: Props) {
                     mesh={avatar}
                     url={stencil.url}
                     placement={stencil.placement}
+                    transform={stencil.transform}
                     projection={stencil.projection}
                     renderOrder={index + 1}
                   />

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type DragEvent } from "react";
+import { createStencil } from "@/lib/stencil";
 import type { Stencil } from "@/types";
 
 interface Props {
@@ -11,12 +12,7 @@ interface Props {
 function toStencils(files: FileList): Stencil[] {
   return Array.from(files)
     .filter((file) => file.type === "image/png")
-    .map((file) => ({
-      id: crypto.randomUUID(),
-      name: file.name,
-      url: URL.createObjectURL(file),
-      projection: false,
-    }));
+    .map(createStencil);
 }
 
 /** Drop zone and file picker for transparent PNG stencils. */

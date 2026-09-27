@@ -1,5 +1,5 @@
-import { Object3D, Vector3 } from "three";
-import type { Placement } from "@/types";
+import { MathUtils, Object3D, Vector3 } from "three";
+import type { Placement, StencilTransform } from "@/types";
 
 /**
  * Object whose +Z axis follows the surface normal at the placement point and
@@ -10,6 +10,16 @@ export function projectorFrame({ position, normal }: Placement): Object3D {
   const frame = new Object3D();
   frame.position.copy(center);
   frame.lookAt(center.clone().add(new Vector3(...normal)));
+  frame.updateMatrixWorld();
+  return frame;
+}
+
+/** Projector frame moved by the offset and turned by the rotation of the transform. */
+export function transformedFrame(placement: Placement, transform: StencilTransform): Object3D {
+  const frame = projectorFrame(placement);
+  frame.translateX(transform.offsetX);
+  frame.translateY(transform.offsetY);
+  frame.rotateZ(MathUtils.degToRad(transform.rotation));
   frame.updateMatrixWorld();
   return frame;
 }

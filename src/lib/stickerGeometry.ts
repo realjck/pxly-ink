@@ -1,5 +1,5 @@
-import { BufferGeometry, Float32BufferAttribute, Vector2, Vector3 } from "three";
-import type { Placement } from "@/types";
+import { BufferGeometry, Float32BufferAttribute, MathUtils, Vector2, Vector3 } from "three";
+import type { Placement, StencilTransform } from "@/types";
 import { projectorFrame } from "./projectorFrame";
 import type { SurfaceGraph } from "./surfaceGraph";
 
@@ -24,9 +24,19 @@ const CLIP_PLANES: ((uv: Vector2) => number)[] = [
  * Surface-following decal: the image is laid flat along the skin using a
  * discrete exponential map around the placement point, then clipped to its square.
  */
-export function buildSticker(graph: SurfaceGraph, placement: Placement, size: number): BufferGeometry {
-  const uvs = computeExpMap(graph, placement, size * REACH);
-  return triangulate(graph, uvs, size);
+export function buildSticker(
+  graph: SurfaceGraph,
+  placement: Placement,
+  transform: StencilTransform,
+): BufferGeometry {
+  const { size, rotation, offsetX, offsetY } = transform;
+  const reach = Math.hypot(offsetX, offsetY) + size * REACH;
+  const uvs = computeExpMap(graph, placement, reach);
+  const center = new Vector2(offsetX, offsetY);
+  const angle = -MathUtils.degToRad(rotation);
+  const toImage = (mapped: Vector2) =>
+    mapped.clone().rotateAround(center, angle).sub(center).divideScalar(size).addScalar(0.5);
+  return triangulate(graph, uvs, toImage);
 }
 
 /** Moves a tangent vector into the tangent plane of another normal. */
@@ -110,7 +120,11 @@ function clip(polygon: Corner[], inside: (uv: Vector2) => number): Corner[] {
 }
 
 /** Keeps mapped triangles, clipped to the image square, as a new geometry. */
-function triangulate(graph: SurfaceGraph, uvs: Map<number, Vector2>, size: number): BufferGeometry {
+function triangulate(
+  graph: SurfaceGraph,
+  uvs: Map<number, Vector2>,
+  toImage: (mapped: Vector2) => Vector2,
+): BufferGeometry {
   const positions: number[] = [];
   const normals: number[] = [];
   const uvOut: number[] = [];
@@ -122,7 +136,7 @@ function triangulate(graph: SurfaceGraph, uvs: Map<number, Vector2>, size: numbe
     let polygon: Corner[] = ids.map((id) => ({
       position: graph.positions[id],
       normal: graph.normals[id],
-      uv: uvs.get(id)!.clone().divideScalar(size).addScalar(0.5),
+      uv: toImage(uvs.get(id)!),
     }));
     for (const plane of CLIP_PLANES) polygon = clip(polygon, plane);
 

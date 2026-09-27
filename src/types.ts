@@ -7,6 +7,14 @@ export interface Placement {
   faceIndex: number;
 }
 
+/** User adjustments relative to the placement point (meters, degrees). */
+export interface StencilTransform {
+  size: number;
+  rotation: number;
+  offsetX: number;
+  offsetY: number;
+}
+
 /** A 2D image the user uploaded, to be projected onto the avatar. */
 export interface Stencil {
   id: string;
@@ -14,5 +22,6 @@ export interface Stencil {
   url: string;
   /** Planar projection instead of the default surface-following sticker. */
   projection: boolean;
+  transform: StencilTransform;
   placement?: Placement;
 }
