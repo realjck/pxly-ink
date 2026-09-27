@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import type { Stencil } from "@/types";
+import type { Placement, Stencil } from "@/types";
 import Viewer from "./Viewer";
 import StencilList from "./ui/StencilList";
 import StencilUploader from "./ui/StencilUploader";
@@ -17,6 +17,12 @@ export default function Editor() {
     setActiveId(added[added.length - 1].id);
   }
 
+  function placeStencil(id: string, placement: Placement) {
+    setStencils((current) =>
+      current.map((stencil) => (stencil.id === id ? { ...stencil, placement } : stencil)),
+    );
+  }
+
   return (
     <div className="flex h-screen w-screen">
       <aside className="flex w-64 shrink-0 flex-col gap-3 overflow-y-auto bg-zinc-900 p-3 text-zinc-100">
@@ -25,7 +31,7 @@ export default function Editor() {
         <StencilList stencils={stencils} activeId={activeId} onSelect={setActiveId} />
       </aside>
       <div className="flex-1">
-        <Viewer />
+        <Viewer stencils={stencils} activeId={activeId} onPlace={placeStencil} />
       </div>
     </div>
   );
