@@ -2,7 +2,7 @@
 
 import { OrbitControls } from "@react-three/drei";
 import { Canvas, type ThreeEvent } from "@react-three/fiber";
-import { Suspense, useRef, useState } from "react";
+import { Suspense, useRef } from "react";
 import type { Mesh } from "three";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import type { Placement, Stencil, Vec3 } from "@/types";
@@ -15,14 +15,15 @@ const CAMERA_POSITION: Vec3 = [0, 1.2, 3.2];
 const CAMERA_TARGET: Vec3 = [0, 1.1, 0];
 
 interface Props {
+  avatar: Mesh | null;
+  onAvatarLoad: (mesh: Mesh | null) => void;
   stencils: Stencil[];
   activeId: string | null;
   onPlace: (id: string, placement: Placement) => void;
 }
 
 /** Full-screen 3D scene: avatar, projected stencils and orbit controls. */
-export default function Viewer({ stencils, activeId, onPlace }: Props) {
-  const [avatar, setAvatar] = useState<Mesh | null>(null);
+export default function Viewer({ avatar, onAvatarLoad, stencils, activeId, onPlace }: Props) {
   const controls = useRef<OrbitControlsImpl>(null);
 
   function handleSurfaceClick(event: ThreeEvent<MouseEvent>) {
@@ -51,7 +52,7 @@ export default function Viewer({ stencils, activeId, onPlace }: Props) {
         <directionalLight position={[2, 3, 2]} intensity={1.5} />
         <directionalLight position={[-2, 2, -2]} intensity={0.5} />
         <Suspense fallback={null}>
-          <Avatar ref={setAvatar} onSurfaceClick={handleSurfaceClick} />
+          <Avatar ref={onAvatarLoad} onSurfaceClick={handleSurfaceClick} />
         </Suspense>
         {avatar &&
           stencils.map(

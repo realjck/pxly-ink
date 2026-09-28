@@ -1,4 +1,4 @@
-import { BufferGeometry, Vector3 } from "three";
+import { BufferAttribute, BufferGeometry, Vector3 } from "three";
 
 /** Welded vertex topology of a non-indexed triangle mesh. */
 export interface SurfaceGraph {
@@ -7,6 +7,10 @@ export interface SurfaceGraph {
   positions: Vector3[];
   normals: Vector3[];
   neighbors: Set<number>[];
+  /** Original texture coordinates, per corner. */
+  baseUv: BufferAttribute;
+  /** SL texture index (see SL_MAPS) of each triangle. */
+  triangleMap: Uint8Array;
 }
 
 const cache = new WeakMap<BufferGeometry, SurfaceGraph>();
@@ -52,5 +56,17 @@ function buildSurfaceGraph(geometry: BufferGeometry): SurfaceGraph {
     neighbors[c].add(a).add(b);
   }
 
-  return { cornerToVertex, positions, normals, neighbors };
+  const triangleMap = new Uint8Array(position.count / 3);
+  for (const group of geometry.groups) {
+    triangleMap.fill(group.materialIndex ?? 0, group.start / 3, (group.start + group.count) / 3);
+  }
+
+  return {
+    cornerToVertex,
+    positions,
+    normals,
+    neighbors,
+    baseUv: geometry.attributes.uv as BufferAttribute,
+    triangleMap,
+  };
 }

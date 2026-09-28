@@ -1,8 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import type { Mesh } from "three";
+import { exportMap } from "@/lib/exportMap";
 import type { Placement, Stencil } from "@/types";
 import Viewer from "./Viewer";
+import ExportPanel from "./ui/ExportPanel";
 import StencilControls from "./ui/StencilControls";
 import StencilList from "./ui/StencilList";
 import StencilUploader from "./ui/StencilUploader";
@@ -11,6 +14,7 @@ import StencilUploader from "./ui/StencilUploader";
 export default function Editor() {
   const [stencils, setStencils] = useState<Stencil[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [avatar, setAvatar] = useState<Mesh | null>(null);
   const active = stencils.find((stencil) => stencil.id === activeId);
 
   function addStencils(added: Stencil[]) {
@@ -37,9 +41,15 @@ export default function Editor() {
             onChange={(changes) => updateStencil(active.id, changes)}
           />
         )}
+        <ExportPanel
+          disabled={!avatar || !stencils.some((stencil) => stencil.placement)}
+          onExport={(map) => avatar && exportMap(avatar, stencils, map)}
+        />
       </aside>
       <div className="flex-1">
         <Viewer
+          avatar={avatar}
+          onAvatarLoad={setAvatar}
           stencils={stencils}
           activeId={activeId}
           onPlace={(id: string, placement: Placement) => updateStencil(id, { placement })}

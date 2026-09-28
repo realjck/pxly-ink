@@ -1,0 +1,36 @@
+import type { Mesh } from "three";
+import type { Stencil } from "@/types";
+import { SL_MAPS, type SlMap } from "./avatarGeometry";
+import { bakeMap } from "./bake";
+import { buildStencilGeometry } from "./stencil";
+import { getSurfaceGraph } from "./surfaceGraph";
+
+async function loadImage(url: string): Promise<HTMLImageElement> {
+  const image = new Image();
+  image.src = url;
+  await image.decode();
+  return image;
+}
+
+function downloadPng(canvas: HTMLCanvasElement, filename: string) {
+  const link = document.createElement("a");
+  link.href = canvas.toDataURL("image/png");
+  link.download = filename;
+  link.click();
+}
+
+/** Bakes the placed stencils (list order = z-order) into one SL texture and downloads it. */
+export async function exportMap(avatar: Mesh, stencils: Stencil[], map: SlMap) {
+  const graph = getSurfaceGraph(avatar.geometry);
+  const layers = await Promise.all(
+    stencils
+      .filter((stencil) => stencil.placement)
+      .map(async ({ placement, transform, projection, url }) => ({
+        geometry: buildStencilGeometry(graph, placement!, transform, projection),
+        image: await loadImage(url),
+      })),
+  );
+  const canvas = bakeMap(layers, avatar.geometry, SL_MAPS.indexOf(map));
+  layers.forEach(({ geometry }) => geometry.dispose());
+  downloadPng(canvas, `pxly-ink-${map}.png`);
+}

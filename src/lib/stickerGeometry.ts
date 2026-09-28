@@ -1,28 +1,15 @@
-import { BufferGeometry, Float32BufferAttribute, MathUtils, Vector2, Vector3 } from "three";
+import { BufferGeometry, MathUtils, Vector2, Vector3 } from "three";
 import type { Placement, StencilTransform } from "@/types";
+import { buildDecalGeometry } from "./decalGeometry";
 import { projectorFrame } from "./projectorFrame";
 import type { SurfaceGraph } from "./surfaceGraph";
-
-interface Corner {
-  position: Vector3;
-  normal: Vector3;
-  uv: Vector2;
-}
 
 /** Geodesic reach, relative to the image size (half diagonal is ~0.71). */
 const REACH = 0.8;
 
-/** Half-planes of the unit UV square, as signed distances (inside >= 0). */
-const CLIP_PLANES: ((uv: Vector2) => number)[] = [
-  (uv) => uv.x,
-  (uv) => 1 - uv.x,
-  (uv) => uv.y,
-  (uv) => 1 - uv.y,
-];
-
 /**
  * Surface-following decal: the image is laid flat along the skin using a
- * discrete exponential map around the placement point, then clipped to its square.
+ * discrete exponential map around the placement point.
  */
 export function buildSticker(
   graph: SurfaceGraph,
@@ -31,12 +18,17 @@ export function buildSticker(
 ): BufferGeometry {
   const { size, rotation, offsetX, offsetY } = transform;
   const reach = Math.hypot(offsetX, offsetY) + size * REACH;
-  const uvs = computeExpMap(graph, placement, reach);
+  const mapped = computeExpMap(graph, placement, reach);
   const center = new Vector2(offsetX, offsetY);
   const angle = -MathUtils.degToRad(rotation);
-  const toImage = (mapped: Vector2) =>
-    mapped.clone().rotateAround(center, angle).sub(center).divideScalar(size).addScalar(0.5);
-  return triangulate(graph, uvs, toImage);
+
+  return buildDecalGeometry(graph, (first) => {
+    const ids = Array.from(graph.cornerToVertex.subarray(first, first + 3));
+    if (!ids.every((id) => mapped.has(id))) return null;
+    return ids.map((id) =>
+      mapped.get(id)!.clone().rotateAround(center, angle).sub(center).divideScalar(size).addScalar(0.5),
+    );
+  });
 }
 
 /** Moves a tangent vector into the tangent plane of another normal. */
@@ -96,62 +88,4 @@ function computeExpMap(graph: SurfaceGraph, placement: Placement, radius: number
     }
   }
   return uvs;
-}
-
-function lerpCorner(a: Corner, b: Corner, t: number): Corner {
-  return {
-    position: a.position.clone().lerp(b.position, t),
-    normal: a.normal.clone().lerp(b.normal, t).normalize(),
-    uv: a.uv.clone().lerp(b.uv, t),
-  };
-}
-
-/** Sutherland-Hodgman clip of a convex polygon against one UV half-plane. */
-function clip(polygon: Corner[], inside: (uv: Vector2) => number): Corner[] {
-  const out: Corner[] = [];
-  polygon.forEach((a, i) => {
-    const b = polygon[(i + 1) % polygon.length];
-    const da = inside(a.uv);
-    const db = inside(b.uv);
-    if (da >= 0) out.push(a);
-    if (da >= 0 !== db >= 0) out.push(lerpCorner(a, b, da / (da - db)));
-  });
-  return out;
-}
-
-/** Keeps mapped triangles, clipped to the image square, as a new geometry. */
-function triangulate(
-  graph: SurfaceGraph,
-  uvs: Map<number, Vector2>,
-  toImage: (mapped: Vector2) => Vector2,
-): BufferGeometry {
-  const positions: number[] = [];
-  const normals: number[] = [];
-  const uvOut: number[] = [];
-
-  for (let corner = 0; corner < graph.cornerToVertex.length; corner += 3) {
-    const ids = Array.from(graph.cornerToVertex.subarray(corner, corner + 3));
-    if (!ids.every((id) => uvs.has(id))) continue;
-
-    let polygon: Corner[] = ids.map((id) => ({
-      position: graph.positions[id],
-      normal: graph.normals[id],
-      uv: toImage(uvs.get(id)!),
-    }));
-    for (const plane of CLIP_PLANES) polygon = clip(polygon, plane);
-
-    for (let i = 1; i + 1 < polygon.length; i++) {
-      for (const c of [polygon[0], polygon[i], polygon[i + 1]]) {
-        positions.push(...c.position.toArray());
-        normals.push(...c.normal.toArray());
-        uvOut.push(...c.uv.toArray());
-      }
-    }
-  }
-
-  const geometry = new BufferGeometry();
-  geometry.setAttribute("position", new Float32BufferAttribute(positions, 3));
-  geometry.setAttribute("normal", new Float32BufferAttribute(normals, 3));
-  geometry.setAttribute("uv", new Float32BufferAttribute(uvOut, 2));
-  return geometry;
 }
