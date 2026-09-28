@@ -44,3 +44,9 @@ UI components live in `src/components/ui`, the 3D scene in `src/components`.
 
 Ruth2 v4 mesh and UV guides: `public/models/ruth2/` (originals in `docs/assets/`).
 The male avatar is not supported yet.
+
+## License
+
+[GNU AGPL-3.0](LICENSE). The Ruth2 mesh is AGPL-3.0 by the RuthAndRoth project
+and its UV map is CC-BY Linden Lab: see
+[public/models/ruth2/LICENSE.md](public/models/ruth2/LICENSE.md).
