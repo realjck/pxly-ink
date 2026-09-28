@@ -56,7 +56,7 @@ export default function Editor() {
         )}
         <ExportPanel
           disabled={!avatar || !stencils.some((stencil) => stencil.placement)}
-          onExport={(map) => avatar && exportMap(avatar, stencils, map)}
+          onExport={(map, opacity) => avatar && exportMap(avatar, stencils, map, opacity)}
         />
       </aside>
       <div className="flex-1">

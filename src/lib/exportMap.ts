@@ -19,8 +19,11 @@ function downloadPng(canvas: HTMLCanvasElement, filename: string) {
   link.click();
 }
 
-/** Bakes the placed stencils (list order = z-order) into one SL texture and downloads it. */
-export async function exportMap(avatar: Mesh, stencils: Stencil[], map: SlMap) {
+/**
+ * Bakes the placed stencils (array order = bottom to top) into one SL texture
+ * at the given opacity (0..1) and downloads it.
+ */
+export async function exportMap(avatar: Mesh, stencils: Stencil[], map: SlMap, opacity: number) {
   const graph = getSurfaceGraph(avatar.geometry);
   const layers = await Promise.all(
     stencils
@@ -30,7 +33,7 @@ export async function exportMap(avatar: Mesh, stencils: Stencil[], map: SlMap) {
         image: await loadImage(url),
       })),
   );
-  const canvas = bakeMap(layers, avatar.geometry, SL_MAPS.indexOf(map));
+  const canvas = bakeMap(layers, avatar.geometry, SL_MAPS.indexOf(map), opacity);
   layers.forEach(({ geometry }) => geometry.dispose());
   downloadPng(canvas, `pxly-ink-${map}.png`);
 }

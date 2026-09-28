@@ -122,8 +122,11 @@ function dispose(meshes: Mesh[]) {
   }
 }
 
-/** Converts bottom-up premultiplied float pixels to a top-down straight-alpha canvas. */
-function toCanvas(pixels: Float32Array): HTMLCanvasElement {
+/**
+ * Converts bottom-up premultiplied float pixels to a top-down straight-alpha
+ * canvas, scaling alpha by the export opacity (0..1).
+ */
+function toCanvas(pixels: Float32Array, opacity: number): HTMLCanvasElement {
   const canvas = document.createElement("canvas");
   canvas.width = canvas.height = BAKE_SIZE;
   const context = canvas.getContext("2d")!;
@@ -135,7 +138,7 @@ function toCanvas(pixels: Float32Array): HTMLCanvasElement {
       const alpha = pixels[src + 3];
       if (alpha <= 0) continue;
       for (let k = 0; k < 3; k++) image.data[dst + k] = Math.round((pixels[src + k] / alpha) * 255);
-      image.data[dst + 3] = Math.round(alpha * 255);
+      image.data[dst + 3] = Math.round(alpha * opacity * 255);
     }
   }
   context.putImageData(image, 0, 0);
@@ -145,9 +148,14 @@ function toCanvas(pixels: Float32Array): HTMLCanvasElement {
 /**
  * Renders the layers (bottom to top) into the UV space of one SL texture, pads
  * them past the UV island borders, and returns a BAKE_SIZE canvas that is
- * transparent wherever no decal is present.
+ * transparent wherever no decal is present. Opacity (0..1) applies to the result.
  */
-export function bakeMap(layers: BakeLayer[], avatar: BufferGeometry, mapIndex: number): HTMLCanvasElement {
+export function bakeMap(
+  layers: BakeLayer[],
+  avatar: BufferGeometry,
+  mapIndex: number,
+  opacity: number,
+): HTMLCanvasElement {
   const renderer = new WebGLRenderer({ alpha: true });
   const target = new WebGLRenderTarget(BAKE_SIZE, BAKE_SIZE, { type: FloatType });
 
@@ -164,5 +172,5 @@ export function bakeMap(layers: BakeLayer[], avatar: BufferGeometry, mapIndex: n
   const mask = new Uint8Array(BAKE_SIZE * BAKE_SIZE);
   for (let i = 0; i < mask.length; i++) mask[i] = maskPixels[i * 4 + 3] > 0 ? 1 : 0;
   dilate(pixels, mask, BAKE_SIZE, SEAM_PADDING);
-  return toCanvas(pixels);
+  return toCanvas(pixels, opacity);
 }
