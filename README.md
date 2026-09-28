@@ -2,7 +2,7 @@
 
 Web tool for making tattoos for Second Life avatars.
 
-**Live:** https://realjck.github.io/pxly-ink/
+**Live:** https://ink.pxly.fr
 
 Drop transparent PNGs, place them on a 3D Ruth2 avatar, adjust them, and export
 the result as 1024×1024 PNG textures for the SL Head, Upper and Lower body layers.
