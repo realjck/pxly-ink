@@ -19,6 +19,7 @@ export default function HudButton({ label, step, children }: Props) {
   const frame = useRef(0);
 
   function start(event: PointerEvent<SVGGElement>) {
+    stop();
     event.currentTarget.setPointerCapture(event.pointerId);
     step(TAP);
     let last = performance.now();
@@ -50,6 +51,7 @@ export default function HudButton({ label, step, children }: Props) {
       onPointerUp={stop}
       onPointerCancel={stop}
       onLostPointerCapture={stop}
+      onContextMenu={stop}
       onKeyDown={press}
     >
       <title>{label}</title>
