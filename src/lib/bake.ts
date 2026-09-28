@@ -13,8 +13,10 @@ import {
 } from "three";
 import { dilate } from "./dilate";
 
-export const BAKE_SIZE = 1024;
-/** Pixels grown past UV island borders to hide seams. */
+/** Export texture sizes in pixels, the default first. */
+export const BAKE_SIZES = [2048, 1024] as const;
+export type BakeSize = (typeof BAKE_SIZES)[number];
+/** Pixels grown past UV island borders to hide seams, per 1024 pixels of texture. */
 const SEAM_PADDING = 16;
 
 export interface BakeLayer {
@@ -101,15 +103,15 @@ function decalMeshes(layers: BakeLayer[], mapIndex: number): Mesh[] {
 }
 
 /** Renders meshes into the target and reads back bottom-up RGBA floats. */
-function renderPixels(renderer: WebGLRenderer, target: WebGLRenderTarget, meshes: Mesh[]): Float32Array {
+function renderPixels(renderer: WebGLRenderer, target: WebGLRenderTarget, meshes: Mesh[], size: number): Float32Array {
   const scene = new Scene();
   scene.add(...meshes);
   renderer.setRenderTarget(target);
   renderer.setClearColor(0x000000, 0);
   renderer.clear();
   renderer.render(scene, new Camera());
-  const pixels = new Float32Array(BAKE_SIZE * BAKE_SIZE * 4);
-  renderer.readRenderTargetPixels(target, 0, 0, BAKE_SIZE, BAKE_SIZE, pixels);
+  const pixels = new Float32Array(size * size * 4);
+  renderer.readRenderTargetPixels(target, 0, 0, size, size, pixels);
   return pixels;
 }
 
@@ -126,15 +128,15 @@ function dispose(meshes: Mesh[]) {
  * Converts bottom-up premultiplied float pixels to a top-down straight-alpha
  * canvas, scaling alpha by the export opacity (0..1).
  */
-function toCanvas(pixels: Float32Array, opacity: number): HTMLCanvasElement {
+function toCanvas(pixels: Float32Array, size: number, opacity: number): HTMLCanvasElement {
   const canvas = document.createElement("canvas");
-  canvas.width = canvas.height = BAKE_SIZE;
+  canvas.width = canvas.height = size;
   const context = canvas.getContext("2d")!;
-  const image = context.createImageData(BAKE_SIZE, BAKE_SIZE);
-  for (let y = 0; y < BAKE_SIZE; y++) {
-    for (let x = 0; x < BAKE_SIZE; x++) {
-      const src = ((BAKE_SIZE - 1 - y) * BAKE_SIZE + x) * 4;
-      const dst = (y * BAKE_SIZE + x) * 4;
+  const image = context.createImageData(size, size);
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      const src = ((size - 1 - y) * size + x) * 4;
+      const dst = (y * size + x) * 4;
       const alpha = pixels[src + 3];
       if (alpha <= 0) continue;
       for (let k = 0; k < 3; k++) image.data[dst + k] = Math.round((pixels[src + k] / alpha) * 255);
@@ -147,7 +149,7 @@ function toCanvas(pixels: Float32Array, opacity: number): HTMLCanvasElement {
 
 /**
  * Renders the layers (bottom to top) into the UV space of one SL texture, pads
- * them past the UV island borders, and returns a BAKE_SIZE canvas that is
+ * them past the UV island borders, and returns a `size` square canvas that is
  * transparent wherever no decal is present. Opacity (0..1) applies to the result.
  */
 export function bakeMap(
@@ -155,22 +157,23 @@ export function bakeMap(
   avatar: BufferGeometry,
   mapIndex: number,
   opacity: number,
+  size: BakeSize,
 ): HTMLCanvasElement {
   const renderer = new WebGLRenderer({ alpha: true });
-  const target = new WebGLRenderTarget(BAKE_SIZE, BAKE_SIZE, { type: FloatType });
+  const target = new WebGLRenderTarget(size, size, { type: FloatType });
 
   const islands = islandMeshes(avatar, mapIndex);
-  const maskPixels = renderPixels(renderer, target, islands);
+  const maskPixels = renderPixels(renderer, target, islands, size);
   const decals = decalMeshes(layers, mapIndex);
-  const pixels = renderPixels(renderer, target, decals);
+  const pixels = renderPixels(renderer, target, decals, size);
 
   dispose([...islands, ...decals]);
   target.dispose();
   renderer.dispose();
   renderer.forceContextLoss();
 
-  const mask = new Uint8Array(BAKE_SIZE * BAKE_SIZE);
+  const mask = new Uint8Array(size * size);
   for (let i = 0; i < mask.length; i++) mask[i] = maskPixels[i * 4 + 3] > 0 ? 1 : 0;
-  dilate(pixels, mask, BAKE_SIZE, SEAM_PADDING);
-  return toCanvas(pixels, opacity);
+  dilate(pixels, mask, size, (SEAM_PADDING * size) / 1024);
+  return toCanvas(pixels, size, opacity);
 }

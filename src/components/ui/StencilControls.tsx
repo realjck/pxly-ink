@@ -63,10 +63,10 @@ export default function StencilControls({ stencil, onChange }: Props) {
         unit=" cm"
         onChange={(value) => setTransform({ offsetY: value / 100 })}
       />
-      <label className="flex items-center gap-2 text-ink/80">
+      <label className="flex cursor-pointer items-center gap-2 text-ink/80">
         <input
           type="checkbox"
-          className="accent-skin"
+          className="cursor-pointer accent-skin"
           checked={stencil.projection}
           onChange={(event) => onChange({ projection: event.target.checked })}
         />
@@ -74,7 +74,7 @@ export default function StencilControls({ stencil, onChange }: Props) {
       </label>
       <button
         onClick={() => onChange({ transform: DEFAULT_TRANSFORM })}
-        className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-ink/80 transition-colors hover:bg-white/10 hover:text-ink"
+        className="cursor-pointer rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-ink/80 transition-colors hover:bg-white/10 hover:text-ink"
       >
         Reset adjustments
       </button>

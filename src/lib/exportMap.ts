@@ -1,7 +1,7 @@
 import type { Mesh } from "three";
 import type { Stencil } from "@/types";
 import { SL_MAPS, type SlMap } from "./avatarGeometry";
-import { bakeMap } from "./bake";
+import { bakeMap, type BakeSize } from "./bake";
 import { buildStencilGeometry } from "./stencil";
 import { getSurfaceGraph } from "./surfaceGraph";
 
@@ -21,9 +21,9 @@ function downloadPng(canvas: HTMLCanvasElement, filename: string) {
 
 /**
  * Bakes the placed stencils (array order = bottom to top) into one SL texture
- * at the given opacity (0..1) and downloads it.
+ * at the given opacity (0..1) and size, and downloads it.
  */
-export async function exportMap(avatar: Mesh, stencils: Stencil[], map: SlMap, opacity: number) {
+export async function exportMap(avatar: Mesh, stencils: Stencil[], map: SlMap, opacity: number, size: BakeSize) {
   const graph = getSurfaceGraph(avatar.geometry);
   const layers = await Promise.all(
     stencils
@@ -33,7 +33,7 @@ export async function exportMap(avatar: Mesh, stencils: Stencil[], map: SlMap, o
         image: await loadImage(url),
       })),
   );
-  const canvas = bakeMap(layers, avatar.geometry, SL_MAPS.indexOf(map), opacity);
+  const canvas = bakeMap(layers, avatar.geometry, SL_MAPS.indexOf(map), opacity, size);
   layers.forEach(({ geometry }) => geometry.dispose());
   downloadPng(canvas, `pxly-ink-${map}.png`);
 }

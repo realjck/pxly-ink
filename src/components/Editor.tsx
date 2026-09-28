@@ -64,7 +64,7 @@ export default function Editor() {
           )}
           <ExportPanel
             disabled={!avatar || !stencils.some((stencil) => stencil.placement)}
-            onExport={(map, opacity) => avatar && exportMap(avatar, stencils, map, opacity)}
+            onExport={(map, opacity, size) => exportMap(avatar!, stencils, map, opacity, size)}
           />
         </div>
       </aside>
