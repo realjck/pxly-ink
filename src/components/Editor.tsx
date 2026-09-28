@@ -6,6 +6,7 @@ import { exportMap } from "@/lib/exportMap";
 import { moveStencil } from "@/lib/stencil";
 import type { Placement, Stencil } from "@/types";
 import Viewer from "./Viewer";
+import AppInfo from "./ui/AppInfo";
 import ExportPanel from "./ui/ExportPanel";
 import StencilControls from "./ui/StencilControls";
 import StencilList from "./ui/StencilList";
@@ -60,7 +61,7 @@ export default function Editor() {
         />
       </aside>
       {/* min-w-0: let the viewer shrink below the canvas size R3F last set. */}
-      <div className="min-w-0 flex-1">
+      <div className="relative min-w-0 flex-1">
         <Viewer
           avatar={avatar}
           onAvatarLoad={setAvatar}
@@ -68,6 +69,7 @@ export default function Editor() {
           activeId={activeId}
           onPlace={(id: string, placement: Placement) => updateStencil(id, { placement })}
         />
+        <AppInfo />
       </div>
     </div>
   );
