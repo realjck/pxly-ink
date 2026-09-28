@@ -1,36 +1,46 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# PXLY INK
 
-## Getting Started
+Web tool for making tattoos for Second Life avatars ([ink.pxly.fr](https://ink.pxly.fr)).
 
-First, run the development server:
+Drop transparent PNGs, place them on a 3D Ruth2 avatar, adjust them, and export
+the result as 1024×1024 PNG textures for the SL Head, Upper and Lower body layers.
+
+## Features
+
+- **Sticker mode** (default): the image follows the skin without stretching.
+  **Projection mode** (option): planar projection along the surface normal.
+- Per-layer size, rotation and offset sliders.
+- Layer list: drag and drop to reorder (top of the list is drawn on top), delete.
+- Export per SL texture, with global opacity. Colors are kept as-is and UV seams
+  are padded so no line shows in-world.
+
+## Stack
+
+Next.js (App Router), React, TypeScript, Tailwind CSS, Three.js, React Three Fiber.
+
+## Development
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev     # http://localhost:3000
+npm run lint
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## How it works
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- `src/lib/avatarGeometry.ts`: merges the OBJ parts into one mesh; each part is
+  tagged with its SL texture (head / upper / lower).
+- `src/lib/stickerGeometry.ts`: sticker decals via a discrete exponential map
+  (geodesic walk from the clicked point) over `surfaceGraph.ts`.
+- `src/lib/projectionGeometry.ts`: planar projection decals.
+- `src/lib/decalGeometry.ts`: shared clipping; decals carry image UVs and the
+  avatar's original UVs.
+- `src/lib/bake.ts`: renders decals in UV space off-screen, then pads past the UV
+  islands (`dilate.ts`) and writes a straight-alpha PNG.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+UI components live in `src/components/ui`, the 3D scene in `src/components`.
 
-## Learn More
+## Assets
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Ruth2 v4 mesh and UV guides: `public/models/ruth2/` (originals in `docs/assets/`).
+The male avatar is not supported yet.
