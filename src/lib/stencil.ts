@@ -17,6 +17,15 @@ export function createStencil(file: File): Stencil {
   };
 }
 
+/** Moves stencil `fromId` to the slot currently held by `toId`. */
+export function moveStencil(stencils: Stencil[], fromId: string, toId: string): Stencil[] {
+  const moved = stencils.find((stencil) => stencil.id === fromId)!;
+  const target = stencils.findIndex((stencil) => stencil.id === toId);
+  const rest = stencils.filter((stencil) => stencil.id !== fromId);
+  rest.splice(target, 0, moved);
+  return rest;
+}
+
 /** Decal geometry of a placed stencil, in its current mode. */
 export function buildStencilGeometry(
   graph: SurfaceGraph,
