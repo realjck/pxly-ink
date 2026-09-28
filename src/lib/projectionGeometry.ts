@@ -5,13 +5,14 @@ import { transformedFrame } from "./projectorFrame";
 import type { SurfaceGraph } from "./surfaceGraph";
 
 /**
- * Planar projection along the surface normal (stretches on curved areas).
+ * Planar projection of an image of the given extent (meters) along the surface normal (stretches on curved areas).
  * Keeps triangles facing the projector and within its depth (half the size).
  */
 export function buildProjection(
   graph: SurfaceGraph,
   placement: Placement,
   transform: StencilTransform,
+  extent: Vector2,
 ): BufferGeometry {
   const frame = transformedFrame(placement, transform);
   const toLocal = new Matrix4().copy(frame.matrixWorld).invert();
@@ -23,9 +24,9 @@ export function buildProjection(
     const [a, b, c] = Array.from(graph.cornerToVertex.subarray(first, first + 3)).map(
       (id) => graph.positions[id],
     );
-    if (Triangle.getNormal(a, b, c, faceNormal).dot(direction) <= 0) return null;
+    if (Triangle.getNormal(a, b, c, faceNormal).dot(direction) <= 0) return [];
     const local = [a, b, c].map((p) => p.clone().applyMatrix4(toLocal));
-    if (local.some((p) => Math.abs(p.z) > halfDepth)) return null;
-    return local.map((p) => new Vector2(p.x, p.y).divideScalar(transform.size).addScalar(0.5));
+    if (local.some((p) => Math.abs(p.z) > halfDepth)) return [];
+    return [local.map((p) => new Vector2(p.x, p.y).divide(extent).addScalar(0.5))];
   });
 }

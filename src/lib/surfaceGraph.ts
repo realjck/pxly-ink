@@ -1,4 +1,4 @@
-import { BufferAttribute, BufferGeometry, Vector3 } from "three";
+import { BufferAttribute, BufferGeometry, Vector2, Vector3 } from "three";
 
 /** Welded vertex topology of a non-indexed triangle mesh. */
 export interface SurfaceGraph {
@@ -11,6 +11,8 @@ export interface SurfaceGraph {
   baseUv: BufferAttribute;
   /** SL texture index (see SL_MAPS) of each triangle. */
   triangleMap: Uint8Array;
+  /** 1 when the mirror-image triangle (x -> -x) has the same texture coordinates (SL arms). */
+  sharesUv: Uint8Array;
 }
 
 const cache = new WeakMap<BufferGeometry, SurfaceGraph>();
@@ -30,12 +32,14 @@ function buildSurfaceGraph(geometry: BufferGeometry): SurfaceGraph {
   const normal = geometry.attributes.normal;
   const cornerToVertex = new Int32Array(position.count);
   const ids = new Map<string, number>();
+  const keyOf = (x: number, y: number, z: number) =>
+    `${Math.round(x * 1e5)},${Math.round(y * 1e5)},${Math.round(z * 1e5)}`;
   const positions: Vector3[] = [];
   const normals: Vector3[] = [];
 
   for (let corner = 0; corner < position.count; corner++) {
     const p = new Vector3().fromBufferAttribute(position, corner);
-    const key = `${Math.round(p.x * 1e5)},${Math.round(p.y * 1e5)},${Math.round(p.z * 1e5)}`;
+    const key = keyOf(p.x, p.y, p.z);
     let id = ids.get(key);
     if (id === undefined) {
       id = positions.length;
@@ -63,10 +67,37 @@ function buildSurfaceGraph(geometry: BufferGeometry): SurfaceGraph {
 
   return {
     cornerToVertex,
+    sharesUv: findSharedUv(geometry, keyOf),
     positions,
     normals,
     neighbors,
     baseUv: geometry.attributes.uv as BufferAttribute,
     triangleMap,
   };
+}
+
+/** UVs closer than this match: the Ruth2 OBJ has 1e-6 differences between mirrored corners. */
+const UV_TOLERANCE = 1e-4;
+
+/** Flags triangles whose mirror image across x = 0 uses the same texture coordinates. */
+function findSharedUv(geometry: BufferGeometry, keyOf: (x: number, y: number, z: number) => string): Uint8Array {
+  const { position, uv } = geometry.attributes;
+  const uvsAt = new Map<string, Vector2[]>();
+  for (let corner = 0; corner < position.count; corner++) {
+    const key = keyOf(position.getX(corner), position.getY(corner), position.getZ(corner));
+    const uvs = uvsAt.get(key) ?? uvsAt.set(key, []).get(key)!;
+    uvs.push(new Vector2(uv.getX(corner), uv.getY(corner)));
+  }
+  const mirrorMatches = (corner: number) => {
+    const own = new Vector2(uv.getX(corner), uv.getY(corner));
+    const twins = uvsAt.get(keyOf(-position.getX(corner), position.getY(corner), position.getZ(corner))) ?? [];
+    return twins.some((twin) => twin.distanceTo(own) < UV_TOLERANCE);
+  };
+
+  const shared = new Uint8Array(position.count / 3);
+  for (let triangle = 0; triangle < shared.length; triangle++) {
+    const first = triangle * 3;
+    shared[triangle] = [first, first + 1, first + 2].every(mirrorMatches) ? 1 : 0;
+  }
+  return shared;
 }

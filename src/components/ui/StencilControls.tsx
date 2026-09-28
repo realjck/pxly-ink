@@ -31,7 +31,7 @@ export default function StencilControls({ stencil, onChange }: Props) {
         label="Size"
         value={cm(transform.size)}
         min={2}
-        max={60}
+        max={100}
         step={1}
         unit=" cm"
         onChange={(value) => setTransform({ size: value / 100 })}

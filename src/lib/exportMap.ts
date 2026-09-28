@@ -28,9 +28,9 @@ export async function exportMap(avatar: Mesh, stencils: Stencil[], map: SlMap, o
   const layers = await Promise.all(
     stencils
       .filter((stencil) => stencil.placement)
-      .map(async ({ placement, transform, projection, url }) => ({
-        geometry: buildStencilGeometry(graph, placement!, transform, projection),
-        image: await loadImage(url),
+      .map(async (stencil) => ({
+        geometry: buildStencilGeometry(graph, stencil),
+        image: await loadImage(stencil.url),
       })),
   );
   const canvas = bakeMap(layers, avatar.geometry, SL_MAPS.indexOf(map), opacity, size);

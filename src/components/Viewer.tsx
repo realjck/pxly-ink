@@ -62,10 +62,7 @@ export default function Viewer({ avatar, onAvatarLoad, stencils, activeId, onPla
                 <Suspense key={stencil.id} fallback={null}>
                   <StencilDecal
                     mesh={avatar}
-                    url={stencil.url}
-                    placement={stencil.placement}
-                    transform={stencil.transform}
-                    projection={stencil.projection}
+                    stencil={stencil}
                     renderOrder={index + 1}
                   />
                 </Suspense>

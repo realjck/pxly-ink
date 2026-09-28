@@ -9,10 +9,12 @@ interface Props {
 }
 
 /** Converts dropped or picked files into stencils, keeping PNGs only. */
-function toStencils(files: FileList): Stencil[] {
-  return Array.from(files)
-    .filter((file) => file.type === "image/png")
-    .map(createStencil);
+function toStencils(files: FileList): Promise<Stencil[]> {
+  return Promise.all(
+    Array.from(files)
+      .filter((file) => file.type === "image/png")
+      .map(createStencil),
+  );
 }
 
 /** Drop zone and file picker for transparent PNG stencils. */
@@ -22,7 +24,7 @@ export default function StencilUploader({ onAdd }: Props) {
   function handleDrop(event: DragEvent) {
     event.preventDefault();
     setHover(false);
-    onAdd(toStencils(event.dataTransfer.files));
+    toStencils(event.dataTransfer.files).then(onAdd);
   }
 
   return (
@@ -46,8 +48,8 @@ export default function StencilUploader({ onAdd }: Props) {
         multiple
         className="hidden"
         onChange={(event) => {
-          if (event.target.files) onAdd(toStencils(event.target.files));
-          event.target.value = "";
+          const input = event.target;
+          if (input.files) toStencils(input.files).then(onAdd).finally(() => (input.value = ""));
         }}
       />
     </label>

@@ -1,5 +1,5 @@
-import type { BufferGeometry } from "three";
-import type { Placement, Stencil, StencilTransform } from "@/types";
+import { Vector2, type BufferGeometry } from "three";
+import type { Stencil, StencilTransform } from "@/types";
 import { buildProjection } from "./projectionGeometry";
 import { buildSticker } from "./stickerGeometry";
 import type { SurfaceGraph } from "./surfaceGraph";
@@ -7,11 +7,15 @@ import type { SurfaceGraph } from "./surfaceGraph";
 export const DEFAULT_TRANSFORM: StencilTransform = { size: 0.15, rotation: 0, offsetX: 0, offsetY: 0 };
 
 /** Creates an unplaced sticker-mode stencil from an image file. */
-export function createStencil(file: File): Stencil {
+export async function createStencil(file: File): Promise<Stencil> {
+  const bitmap = await createImageBitmap(file);
+  const aspect = bitmap.width / bitmap.height;
+  bitmap.close();
   return {
     id: crypto.randomUUID(),
     name: file.name,
     url: URL.createObjectURL(file),
+    aspect,
     projection: false,
     transform: DEFAULT_TRANSFORM,
   };
@@ -26,12 +30,16 @@ export function moveStencil(stencils: Stencil[], fromId: string, toId: string): 
   return rest;
 }
 
+/** Image width and height in meters: `size` is the longest side. */
+export function imageExtent(size: number, aspect: number): Vector2 {
+  return aspect >= 1 ? new Vector2(size, size / aspect) : new Vector2(size * aspect, size);
+}
+
 /** Decal geometry of a placed stencil, in its current mode. */
 export function buildStencilGeometry(
   graph: SurfaceGraph,
-  placement: Placement,
-  transform: StencilTransform,
-  projection: boolean,
+  { placement, transform, projection, aspect }: Stencil,
 ): BufferGeometry {
-  return (projection ? buildProjection : buildSticker)(graph, placement, transform);
+  const extent = imageExtent(transform.size, aspect);
+  return (projection ? buildProjection : buildSticker)(graph, placement!, transform, extent);
 }

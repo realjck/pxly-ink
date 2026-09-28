@@ -20,6 +20,8 @@ export interface Stencil {
   id: string;
   name: string;
   url: string;
+  /** Image width / height. */
+  aspect: number;
   /** Planar projection instead of the default surface-following sticker. */
   projection: boolean;
   transform: StencilTransform;
