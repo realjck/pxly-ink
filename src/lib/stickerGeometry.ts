@@ -6,6 +6,8 @@ import type { SurfaceGraph } from "./surfaceGraph";
 
 /** Geodesic reach, relative to the image size (half diagonal is ~0.71). */
 const REACH = 0.8;
+/** Triangles stretched more than this in the flattened map are dropped. */
+const MAX_STRETCH = 2;
 
 /**
  * Surface-following decal: the image is laid flat along the skin using a
@@ -25,10 +27,24 @@ export function buildSticker(
   return buildDecalGeometry(graph, (first) => {
     const ids = Array.from(graph.cornerToVertex.subarray(first, first + 3));
     if (!ids.every((id) => mapped.has(id))) return null;
+    if (stretch(graph, mapped, ids) > MAX_STRETCH) return null;
     return ids.map((id) =>
       mapped.get(id)!.clone().rotateAround(center, angle).sub(center).divideScalar(size).addScalar(0.5),
     );
   });
+}
+
+/**
+ * Largest ratio of flattened to 3D edge length in a triangle (1 = undistorted).
+ * High on triangles where walks around a limb meet from both sides.
+ */
+function stretch(graph: SurfaceGraph, mapped: Map<number, Vector2>, ids: number[]): number {
+  return Math.max(
+    ...ids.map((a, k) => {
+      const b = ids[(k + 1) % 3];
+      return mapped.get(a)!.distanceTo(mapped.get(b)!) / graph.positions[a].distanceTo(graph.positions[b]);
+    }),
+  );
 }
 
 /** Moves a tangent vector into the tangent plane of another normal. */
