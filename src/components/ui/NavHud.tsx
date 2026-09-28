@@ -150,7 +150,7 @@ export default function NavHud({ controls, onReset }: Props) {
   const { x, y } = ORB;
   return (
     <div className="absolute bottom-4 left-1/2 h-[160px] w-[380px] -translate-x-1/2 animate-[fade-in_0.5s_ease-out]">
-      <div className="absolute inset-x-0 top-[44px] bottom-0 rounded-[28px] border border-white/8 bg-zinc-900/55 shadow-[inset_0_1px_0_rgb(255_255_255/0.06),0_10px_30px_rgb(0_0_0/0.35)] backdrop-blur-md" />
+      <div className="absolute inset-x-0 top-[44px] bottom-0 glass rounded-[28px]" />
       <svg className="absolute inset-0 overflow-visible" viewBox="0 0 380 160" width={380} height={160}>
         <g aria-label="Pan">
           <circle cx={PAD.x} cy={PAD.y} r={38} fill="#0e0e11" fillOpacity="0.55" stroke="#fff" strokeOpacity="0.09" />

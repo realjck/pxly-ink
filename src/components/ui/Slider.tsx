@@ -1,5 +1,7 @@
 "use client";
 
+import type { CSSProperties } from "react";
+
 interface Props {
   label: string;
   value: number;
@@ -13,10 +15,10 @@ interface Props {
 /** Labelled range input showing its current value. */
 export default function Slider({ label, value, min, max, step, unit, onChange }: Props) {
   return (
-    <label className="flex flex-col gap-1">
+    <label className="flex flex-col gap-2">
       <span className="flex justify-between">
         {label}
-        <span className="text-zinc-400 tabular-nums">
+        <span className="text-ink/55 tabular-nums">
           {value}
           {unit}
         </span>
@@ -28,7 +30,8 @@ export default function Slider({ label, value, min, max, step, unit, onChange }:
         step={step}
         value={value}
         onChange={(event) => onChange(Number(event.target.value))}
-        className="accent-sky-500"
+        className="rail"
+        style={{ "--fill": `${((value - min) / (max - min)) * 100}%` } as CSSProperties}
       />
     </label>
   );

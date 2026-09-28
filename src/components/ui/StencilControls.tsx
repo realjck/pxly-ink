@@ -19,14 +19,14 @@ export default function StencilControls({ stencil, onChange }: Props) {
 
   if (!stencil.placement) {
     return (
-      <section className="border-t border-zinc-700 pt-3 text-sm">
+      <section className="border-t border-white/8 pt-4 text-sm">
         <PlaceHint />
       </section>
     );
   }
 
   return (
-    <section className="flex flex-col gap-3 border-t border-zinc-700 pt-3 text-sm">
+    <section className="flex flex-col gap-3 border-t border-white/8 pt-4 text-sm">
       <Slider
         label="Size"
         value={cm(transform.size)}
@@ -63,9 +63,10 @@ export default function StencilControls({ stencil, onChange }: Props) {
         unit=" cm"
         onChange={(value) => setTransform({ offsetY: value / 100 })}
       />
-      <label className="flex items-center gap-2">
+      <label className="flex items-center gap-2 text-ink/80">
         <input
           type="checkbox"
+          className="accent-skin"
           checked={stencil.projection}
           onChange={(event) => onChange({ projection: event.target.checked })}
         />
@@ -73,7 +74,7 @@ export default function StencilControls({ stencil, onChange }: Props) {
       </label>
       <button
         onClick={() => onChange({ transform: DEFAULT_TRANSFORM })}
-        className="rounded bg-zinc-800 px-2 py-1 hover:bg-zinc-700"
+        className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-ink/80 transition-colors hover:bg-white/10 hover:text-ink"
       >
         Reset adjustments
       </button>

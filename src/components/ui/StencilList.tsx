@@ -42,10 +42,10 @@ export default function StencilList({ stencils, activeId, onSelect, onMove, onDe
             endDrag();
           }}
           onDragEnd={endDrag}
-          className={`group flex items-center gap-1 rounded border ${
-            overId === stencil.id && draggedId !== stencil.id ? "border-sky-400" : "border-transparent"
+          className={`group flex items-center gap-1 rounded-[14px] border transition-colors ${
+            overId === stencil.id && draggedId !== stencil.id ? "border-skin" : "border-transparent"
           } ${draggedId === stencil.id ? "opacity-40" : ""} ${
-            stencil.id === activeId ? "bg-sky-500/30" : "hover:bg-zinc-700"
+            stencil.id === activeId ? "bg-white/8 shadow-[inset_0_1px_0_rgb(255_255_255/0.08),inset_2px_0_0_var(--color-skin)]" : "hover:bg-white/5"
           }`}
         >
           <button
@@ -57,7 +57,7 @@ export default function StencilList({ stencils, activeId, onSelect, onMove, onDe
               src={stencil.url}
               alt=""
               draggable={false}
-              className="h-10 w-10 shrink-0 rounded bg-[repeating-conic-gradient(#555_0_25%,#333_0_50%)] bg-[length:10px_10px] object-contain"
+              className="h-10 w-10 shrink-0 rounded-[10px] border border-white/10 bg-[repeating-conic-gradient(#3a3a40_0_25%,#26262b_0_50%)] bg-[length:10px_10px] object-contain"
             />
             <span className="truncate">{stencil.name}</span>
           </button>
@@ -65,7 +65,7 @@ export default function StencilList({ stencils, activeId, onSelect, onMove, onDe
             onClick={() => onDelete(stencil.id)}
             aria-label={`Delete ${stencil.name}`}
             title="Delete layer"
-            className="mr-1 rounded px-2 py-1 text-zinc-400 hover:bg-red-600 hover:text-white"
+            className="mr-1 rounded-full px-2 py-0.5 text-ink/45 hover:bg-red-500/20 hover:text-red-200"
           >
             ×
           </button>

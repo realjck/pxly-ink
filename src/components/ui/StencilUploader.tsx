@@ -33,8 +33,8 @@ export default function StencilUploader({ onAdd }: Props) {
       }}
       onDragLeave={() => setHover(false)}
       onDrop={handleDrop}
-      className={`flex h-24 cursor-pointer items-center justify-center rounded border-2 border-dashed text-center text-sm transition-colors ${
-        hover ? "border-sky-400 bg-sky-400/10" : "border-zinc-600 hover:border-zinc-400"
+      className={`flex h-24 cursor-pointer items-center justify-center rounded-[18px] border border-dashed bg-well/55 text-center text-sm leading-relaxed transition-colors ${
+        hover ? "border-skin bg-skin/10 text-skin" : "border-white/20 text-ink/70 hover:border-white/40 hover:text-ink"
       }`}
     >
       Drop PNG here

@@ -39,26 +39,31 @@ export default function Editor() {
 
   return (
     <div className="flex h-screen w-screen">
-      <aside className="flex w-64 shrink-0 flex-col gap-3 overflow-y-auto bg-zinc-900 p-3 text-zinc-100">
-        <h1 className="font-semibold tracking-wide">PXLY INK</h1>
-        <StencilUploader onAdd={addStencils} />
-        <StencilList
-          stencils={stencils}
-          activeId={activeId}
-          onSelect={setActiveId}
-          onMove={(fromId, toId) => setStencils((current) => moveStencil(current, fromId, toId))}
-          onDelete={deleteStencil}
-        />
-        {active && (
-          <StencilControls
-            stencil={active}
-            onChange={(changes) => updateStencil(active.id, changes)}
+      <aside className="flex w-72 shrink-0 p-3 text-ink">
+        <div className="thin-scroll flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto rounded-[28px] border border-white/8 p-4 shadow-[inset_0_1px_0_rgb(255_255_255/0.06)]">
+          <h1 className="flex items-center gap-2 px-1 font-semibold tracking-wide">
+            <span className="size-2 rounded-full bg-skin shadow-[0_0_8px_var(--color-skin)]" aria-hidden />
+            PXLY INK
+          </h1>
+          <StencilUploader onAdd={addStencils} />
+          <StencilList
+            stencils={stencils}
+            activeId={activeId}
+            onSelect={setActiveId}
+            onMove={(fromId, toId) => setStencils((current) => moveStencil(current, fromId, toId))}
+            onDelete={deleteStencil}
           />
-        )}
-        <ExportPanel
-          disabled={!avatar || !stencils.some((stencil) => stencil.placement)}
-          onExport={(map, opacity) => avatar && exportMap(avatar, stencils, map, opacity)}
-        />
+          {active && (
+            <StencilControls
+              stencil={active}
+              onChange={(changes) => updateStencil(active.id, changes)}
+            />
+          )}
+          <ExportPanel
+            disabled={!avatar || !stencils.some((stencil) => stencil.placement)}
+            onExport={(map, opacity) => avatar && exportMap(avatar, stencils, map, opacity)}
+          />
+        </div>
       </aside>
       {/* min-w-0: let the viewer shrink below the canvas size R3F last set. */}
       <div className="relative min-w-0 flex-1">
