@@ -6,7 +6,8 @@ import type { Mesh } from "three";
 import { OBJLoader } from "three/addons/loaders/OBJLoader.js";
 import { mergeAvatar } from "@/lib/avatarGeometry";
 
-const AVATAR_URL = "/models/ruth2/Ruth2v4.obj";
+/** basePath is not applied to fetched assets, so it is prefixed here. */
+const AVATAR_URL = `${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/models/ruth2/Ruth2v4.obj`;
 
 interface Props {
   ref?: Ref<Mesh>;

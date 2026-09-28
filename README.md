@@ -1,6 +1,8 @@
 # PXLY INK
 
-Web tool for making tattoos for Second Life avatars ([ink.pxly.fr](https://ink.pxly.fr)).
+Web tool for making tattoos for Second Life avatars.
+
+**Live:** https://realjck.github.io/pxly-ink/
 
 Drop transparent PNGs, place them on a 3D Ruth2 avatar, adjust them, and export
 the result as 1024×1024 PNG textures for the SL Head, Upper and Lower body layers.
@@ -25,6 +27,9 @@ npm install
 npm run dev     # http://localhost:3000
 npm run lint
 ```
+
+Pushing to `master` deploys a static export to GitHub Pages
+(`.github/workflows/deploy.yml`).
 
 ## How it works
 
