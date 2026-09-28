@@ -5,7 +5,7 @@ const REPO_URL = "https://github.com/realjck/pxly-ink";
 /** App version and a link to the GitHub repository. */
 export default function AppInfo() {
   return (
-    <div className="absolute top-3 right-4 flex items-center gap-3 text-xs text-ink/45">
+    <div className="flex items-center gap-3 text-xs text-ink/45">
       <span>v{pkg.version}</span>
       <a href={REPO_URL} target="_blank" rel="noreferrer" aria-label="GitHub repository" className="hover:text-ink">
         <svg viewBox="0 0 16 16" width="18" height="18" fill="currentColor" aria-hidden>
