@@ -72,6 +72,12 @@ export default function Viewer({ avatar, onAvatarLoad, stencils, activeId, onPla
           )}
         <OrbitControls ref={controls} target={CAMERA_TARGET} makeDefault />
       </Canvas>
+      {!avatar && (
+        <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-3 text-sm text-zinc-300">
+          <div className="size-10 animate-spin rounded-full border-4 border-zinc-600 border-t-zinc-100" />
+          Loading avatar...
+        </div>
+      )}
       <button
         onClick={resetCamera}
         className="absolute right-4 bottom-4 rounded bg-zinc-800/80 px-3 py-1.5 text-sm text-zinc-100 hover:bg-zinc-700"
