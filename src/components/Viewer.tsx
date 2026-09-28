@@ -8,6 +8,7 @@ import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import type { Placement, Stencil, Vec3 } from "@/types";
 import Avatar from "./Avatar";
 import StencilDecal from "./StencilDecal";
+import NavHud from "./ui/NavHud";
 
 /** Pointer travel (px) above which a click is treated as an orbit drag. */
 const DRAG_THRESHOLD = 3;
@@ -78,12 +79,7 @@ export default function Viewer({ avatar, onAvatarLoad, stencils, activeId, onPla
           Loading avatar...
         </div>
       )}
-      <button
-        onClick={resetCamera}
-        className="absolute right-4 bottom-4 rounded bg-zinc-800/80 px-3 py-1.5 text-sm text-zinc-100 hover:bg-zinc-700"
-      >
-        Reset camera
-      </button>
+      <NavHud controls={controls} onReset={resetCamera} />
     </div>
   );
 }
