@@ -59,7 +59,8 @@ export default function Editor() {
           onExport={(map, opacity) => avatar && exportMap(avatar, stencils, map, opacity)}
         />
       </aside>
-      <div className="flex-1">
+      {/* min-w-0: let the viewer shrink below the canvas size R3F last set. */}
+      <div className="min-w-0 flex-1">
         <Viewer
           avatar={avatar}
           onAvatarLoad={setAvatar}
