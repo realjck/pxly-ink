@@ -2,6 +2,7 @@
 
 import { DEFAULT_TRANSFORM } from "@/lib/stencil";
 import type { Stencil, StencilTransform } from "@/types";
+import PlaceHint from "./PlaceHint";
 import Slider from "./Slider";
 
 interface Props {
@@ -9,16 +10,23 @@ interface Props {
   onChange: (changes: Partial<Stencil>) => void;
 }
 
-/** Settings of the active stencil: mode and transform sliders (lengths shown in cm). */
+/** Settings of the active stencil (lengths shown in cm), or a placement hint until it is placed. */
 export default function StencilControls({ stencil, onChange }: Props) {
   const { transform } = stencil;
   const setTransform = (changes: Partial<StencilTransform>) =>
     onChange({ transform: { ...transform, ...changes } });
   const cm = (meters: number) => Math.round(meters * 100);
 
+  if (!stencil.placement) {
+    return (
+      <section className="border-t border-zinc-700 pt-3 text-sm">
+        <PlaceHint />
+      </section>
+    );
+  }
+
   return (
     <section className="flex flex-col gap-3 border-t border-zinc-700 pt-3 text-sm">
-      {!stencil.placement && <p className="text-zinc-400">Click on the avatar to place it.</p>}
       <Slider
         label="Size"
         value={cm(transform.size)}
