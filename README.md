@@ -5,13 +5,17 @@ Web tool for making tattoos for Second Life avatars.
 **Live:** https://ink.pxly.fr
 
 Drop transparent PNGs, place them on a 3D Ruth2 avatar, adjust them, and export
-the result as 1024×1024 PNG textures for the SL Head, Upper and Lower body layers.
+the result as 2048×2048 (or 1024×1024) PNG textures for the SL Head, Upper and
+Lower body layers.
 
 ## Features
 
 - **Sticker mode** (default): the image follows the skin without stretching.
   **Projection mode** (option): planar projection along the surface normal.
-- Per-layer size, rotation and offset sliders.
+- **Limb wrap**: pick arms, torso or a leg on the mannequin to wrap the image once
+  all around it, with a straight seam behind.
+- Rectangular images keep their aspect ratio. Per-layer size, rotation and offset sliders.
+- Both arms share one texture in SL, so a tattoo on one arm also shows on the other.
 - Layer list: drag and drop to reorder (top of the list is drawn on top), delete.
 - Export per SL texture, with global opacity. Colors are kept as-is and UV seams
   are padded so no line shows in-world.
@@ -36,7 +40,9 @@ Pushing to `master` deploys a static export to GitHub Pages
 - `src/lib/avatarGeometry.ts`: merges the OBJ parts into one mesh; each part is
   tagged with its SL texture (head / upper / lower).
 - `src/lib/stickerGeometry.ts`: sticker decals via a discrete exponential map
-  (geodesic walk from the clicked point) over `surfaceGraph.ts`.
+  (geodesic walk from the clicked point) over `surfaceGraph.ts`, relaxed with ARAP
+  (`arap.ts`); seams around limbs are unfolded in `seamCharts.ts`.
+- `src/lib/limbGeometry.ts`: cylinder frames of the limbs for the wrap mode.
 - `src/lib/projectionGeometry.ts`: planar projection decals.
 - `src/lib/decalGeometry.ts`: shared clipping; decals carry image UVs and the
   avatar's original UVs.
