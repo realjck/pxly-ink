@@ -3,8 +3,9 @@
 import { useState } from "react";
 import type { Mesh } from "three";
 import { exportMap } from "@/lib/exportMap";
-import { moveStencil } from "@/lib/stencil";
-import type { Placement, Stencil } from "@/types";
+import { DEFAULT_TRANSFORM, isPlaced, moveStencil, wrapAround } from "@/lib/stencil";
+import { getSurfaceGraph } from "@/lib/surfaceGraph";
+import type { Limb, Placement, Stencil } from "@/types";
 import Viewer from "./Viewer";
 import AppInfo from "./ui/AppInfo";
 import ExportPanel from "./ui/ExportPanel";
@@ -29,6 +30,16 @@ export default function Editor() {
     setStencils((current) =>
       current.map((stencil) => (stencil.id === id ? { ...stencil, ...changes } : stencil)),
     );
+  }
+
+  /** Places a stencil at a point; a stencil wrapped around a limb turns back into a sticker. */
+  function placeStencil(id: string, placement: Placement) {
+    const wrapped = stencils.find((stencil) => stencil.id === id)!.limb;
+    updateStencil(id, wrapped ? { placement, limb: undefined, transform: DEFAULT_TRANSFORM } : { placement });
+  }
+
+  function wrapStencil(stencil: Stencil, limb: Limb) {
+    updateStencil(stencil.id, wrapAround(getSurfaceGraph(avatar!.geometry), stencil, limb));
   }
 
   function deleteStencil(id: string) {
@@ -60,10 +71,11 @@ export default function Editor() {
             <StencilControls
               stencil={active}
               onChange={(changes) => updateStencil(active.id, changes)}
+              onWrap={avatar ? (limb) => wrapStencil(active, limb) : undefined}
             />
           )}
           <ExportPanel
-            disabled={!avatar || !stencils.some((stencil) => stencil.placement)}
+            disabled={!avatar || !stencils.some(isPlaced)}
             onExport={(map, opacity, size) => exportMap(avatar!, stencils, map, opacity, size)}
           />
         </div>
@@ -75,7 +87,7 @@ export default function Editor() {
           onAvatarLoad={setAvatar}
           stencils={stencils}
           activeId={activeId}
-          onPlace={(id: string, placement: Placement) => updateStencil(id, { placement })}
+          onPlace={placeStencil}
         />
       </div>
     </div>

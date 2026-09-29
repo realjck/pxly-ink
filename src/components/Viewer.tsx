@@ -5,6 +5,7 @@ import { Canvas, type ThreeEvent } from "@react-three/fiber";
 import { Suspense, useRef } from "react";
 import type { Mesh } from "three";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
+import { isPlaced } from "@/lib/stencil";
 import type { Placement, Stencil, Vec3 } from "@/types";
 import Avatar from "./Avatar";
 import StencilDecal from "./StencilDecal";
@@ -58,7 +59,7 @@ export default function Viewer({ avatar, onAvatarLoad, stencils, activeId, onPla
         {avatar &&
           stencils.map(
             (stencil, index) =>
-              stencil.placement && (
+              isPlaced(stencil) && (
                 <Suspense key={stencil.id} fallback={null}>
                   <StencilDecal
                     mesh={avatar}

@@ -15,6 +15,9 @@ export interface StencilTransform {
   offsetY: number;
 }
 
+/** Limbs an image can be wrapped around; "arms" covers both, as SL shares their texture. */
+export type Limb = "arms" | "torso" | "rightLeg" | "leftLeg";
+
 /** A 2D image the user uploaded, to be projected onto the avatar. */
 export interface Stencil {
   id: string;
@@ -26,4 +29,6 @@ export interface Stencil {
   projection: boolean;
   transform: StencilTransform;
   placement?: Placement;
+  /** Wrapped once around this limb instead of placed at a point (transform.size is then the image height). */
+  limb?: Limb;
 }

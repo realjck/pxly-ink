@@ -2,7 +2,7 @@ import type { Mesh } from "three";
 import type { Stencil } from "@/types";
 import { SL_MAPS, type SlMap } from "./avatarGeometry";
 import { bakeMap, type BakeSize } from "./bake";
-import { buildStencilGeometry } from "./stencil";
+import { buildStencilGeometry, isPlaced } from "./stencil";
 import { getSurfaceGraph } from "./surfaceGraph";
 
 async function loadImage(url: string): Promise<HTMLImageElement> {
@@ -27,7 +27,7 @@ export async function exportMap(avatar: Mesh, stencils: Stencil[], map: SlMap, o
   const graph = getSurfaceGraph(avatar.geometry);
   const layers = await Promise.all(
     stencils
-      .filter((stencil) => stencil.placement)
+      .filter(isPlaced)
       .map(async (stencil) => ({
         geometry: buildStencilGeometry(graph, stencil),
         image: await loadImage(stencil.url),

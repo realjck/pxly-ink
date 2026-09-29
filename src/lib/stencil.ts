@@ -1,5 +1,6 @@
 import { Vector2, type BufferGeometry } from "three";
-import type { Stencil, StencilTransform } from "@/types";
+import type { Limb, Stencil, StencilTransform } from "@/types";
+import { buildLimbWrap, limbCircumference } from "./limbGeometry";
 import { buildProjection } from "./projectionGeometry";
 import { buildSticker } from "./stickerGeometry";
 import type { SurfaceGraph } from "./surfaceGraph";
@@ -21,6 +22,17 @@ export async function createStencil(file: File): Promise<Stencil> {
   };
 }
 
+/** Whether the stencil shows on the avatar: placed at a point or wrapped around a limb. */
+export function isPlaced(stencil: Stencil): boolean {
+  return Boolean(stencil.placement || stencil.limb);
+}
+
+/** Changes that wrap a stencil around a limb, its height set so the image keeps its aspect. */
+export function wrapAround(graph: SurfaceGraph, stencil: Stencil, limb: Limb): Partial<Stencil> {
+  const size = Math.round((limbCircumference(graph, limb) / stencil.aspect) * 100) / 100;
+  return { limb, placement: undefined, projection: false, transform: { ...DEFAULT_TRANSFORM, size } };
+}
+
 /** Moves stencil `fromId` to the slot currently held by `toId`. */
 export function moveStencil(stencils: Stencil[], fromId: string, toId: string): Stencil[] {
   const moved = stencils.find((stencil) => stencil.id === fromId)!;
@@ -38,8 +50,9 @@ export function imageExtent(size: number, aspect: number): Vector2 {
 /** Decal geometry of a placed stencil, in its current mode. */
 export function buildStencilGeometry(
   graph: SurfaceGraph,
-  { placement, transform, projection, aspect }: Stencil,
+  { placement, transform, projection, aspect, limb }: Stencil,
 ): BufferGeometry {
+  if (limb) return buildLimbWrap(graph, limb, transform);
   const extent = imageExtent(transform.size, aspect);
   return (projection ? buildProjection : buildSticker)(graph, placement!, transform, extent);
 }
