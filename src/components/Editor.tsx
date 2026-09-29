@@ -51,7 +51,7 @@ export default function Editor() {
   return (
     <div className="flex h-screen w-screen">
       <aside className="flex w-72 shrink-0 p-3 text-ink">
-        <div className="thin-scroll flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto rounded-[28px] border border-white/8 p-4 shadow-[inset_0_1px_0_rgb(255_255_255/0.06)]">
+        <div className="thin-scroll flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto rounded-[28px] border border-white/8 bg-panel p-4 shadow-[inset_0_1px_0_rgb(255_255_255/0.06)]">
           <header className="flex items-center justify-between px-1">
             <h1 className="flex items-center gap-2 font-semibold tracking-wide">
               <span className="size-2 rounded-full bg-skin shadow-[0_0_8px_var(--color-skin)]" aria-hidden />

@@ -64,9 +64,9 @@
 ## UI conventions
 
 - Colors and surfaces are tokens in `globals.css`: `ink` (text), `skin` (accent,
-  the avatar skin color), `well` (recess). `glass` is reserved for plates floating
-  over the 3D scene (HUD); the sidebar sits on the scene color (`#1e1e22`) with a
-  border only, so it does not look darker than the viewer.
+  the avatar skin color), `panel` (sidebar box, as dark as the HUD), `well`
+  (recess inside the panel: drop zone, size switch). `glass` is reserved for plates
+  floating over the 3D scene (HUD).
 - Anything `position: fixed` rendered from a panel is portaled to `document.body`
   (see `PlaceHint`): a `backdrop-filter` or `transform` on an ancestor would
   contain it.

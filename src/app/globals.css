@@ -11,7 +11,8 @@
   --color-foreground: var(--foreground);
   --color-ink: #e8e4df;
   --color-skin: #d9b8a0;
-  --color-well: #0e0e11;
+  --color-panel: #141417;
+  --color-well: #09090b;
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
@@ -32,10 +33,10 @@ body {
   backdrop-filter: blur(12px);
 }
 
-/* Darker recess inside a glass plate. */
+/* Darker recess inside a panel. */
 @utility well {
   border: 1px solid rgb(255 255 255 / 0.09);
-  background: rgb(14 14 17 / 0.55);
+  background: var(--color-well);
 }
 
 /* Thin dark scrollbar for glass panels. */

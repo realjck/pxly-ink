@@ -12,9 +12,13 @@ const PAN_SPEED = 0.5;
 /** Distance factor per second when zooming in. */
 const ZOOM_IN_RATE = 0.4;
 
-const ORB = { x: 190, y: 74, r: 40 };
-const PAD = { x: 66, y: 102 };
-const RAIL = { x: 314, y: 102 };
+/** HUD plate size; every control fits inside it. */
+const HUD = { width: 380, height: 116 };
+const ORB = { x: 190, y: 58, r: 28 };
+const PAD = { x: 66, y: 58 };
+const RAIL = { x: 314, y: 58 };
+/** Distance from the orb center to its rotate chevrons. */
+const CHEVRON = { side: ORB.r + 30, vertical: ORB.r + 17 };
 
 interface Props {
   controls: RefObject<OrbitControls | null>;
@@ -65,7 +69,7 @@ function Orb() {
           <feGaussianBlur stdDeviation="3" />
         </filter>
       </defs>
-      <ellipse cx={x} cy={y + r + 10} rx={26} ry={4} fill="#000" opacity="0.55" filter="url(#hud-blur)" />
+      <ellipse cx={x} cy={y + r + 7} rx={r * 0.65} ry={3} fill="#000" opacity="0.55" filter="url(#hud-blur)" />
       <circle cx={x} cy={y} r={r} fill="url(#hud-orb-fill)" />
       <circle cx={x} cy={y} r={r} fill="url(#hud-orb-glow)" />
       <g clipPath="url(#hud-orb-clip)" fill="none" stroke="#fff" strokeOpacity="0.16" strokeWidth="0.8">
@@ -79,12 +83,12 @@ function Orb() {
       </g>
       <circle cx={x} cy={y} r={r - 0.5} fill="none" stroke="url(#hud-orb-rim)" strokeWidth="1.2" />
       <ellipse
-        cx={x - 14}
-        cy={y - 17}
-        rx={13}
-        ry={6.5}
+        cx={x - r * 0.35}
+        cy={y - r * 0.42}
+        rx={r * 0.33}
+        ry={r * 0.16}
         fill="url(#hud-orb-spec)"
-        transform={`rotate(-35 ${x - 14} ${y - 17})`}
+        transform={`rotate(-35 ${x - r * 0.35} ${y - r * 0.42})`}
       />
     </g>
   );
@@ -92,8 +96,11 @@ function Orb() {
 
 /** Orbit rings around the orb: back halves behind it, front halves over it. */
 function Rings({ front }: { front: boolean }) {
-  const { x, y } = ORB;
-  const [h, v] = [{ rx: 58, ry: 15 }, { rx: 15, ry: 54 }];
+  const { x, y, r } = ORB;
+  const [h, v] = [
+    { rx: r * 1.45, ry: r * 0.37 },
+    { rx: r * 0.37, ry: r * 1.35 },
+  ];
   const style = front
     ? { stroke: "#e8e4df", strokeOpacity: 0.55, strokeWidth: 1.3 }
     : { stroke: "#e8e4df", strokeOpacity: 0.18, strokeWidth: 1, strokeDasharray: "2 3" };
@@ -149,9 +156,12 @@ export default function NavHud({ controls, onReset }: Props) {
 
   const { x, y } = ORB;
   return (
-    <div className="absolute bottom-4 left-1/2 h-[160px] w-[380px] -translate-x-1/2 animate-[fade-in_0.5s_ease-out]">
-      <div className="absolute inset-x-0 top-[44px] bottom-0 glass rounded-[28px]" />
-      <svg className="absolute inset-0 overflow-visible" viewBox="0 0 380 160" width={380} height={160}>
+    <div
+      className="absolute bottom-4 left-1/2 -translate-x-1/2 animate-[fade-in_0.5s_ease-out]"
+      style={{ width: HUD.width, height: HUD.height }}
+    >
+      <div className="absolute inset-0 glass rounded-[28px]" />
+      <svg className="absolute inset-0" viewBox={`0 0 ${HUD.width} ${HUD.height}`} width={HUD.width} height={HUD.height}>
         <g aria-label="Pan">
           <circle cx={PAD.x} cy={PAD.y} r={38} fill="#0e0e11" fillOpacity="0.55" stroke="#fff" strokeOpacity="0.09" />
           <circle cx={PAD.x} cy={PAD.y} r={27} fill="none" stroke="#fff" strokeOpacity="0.06" />
@@ -184,20 +194,20 @@ export default function NavHud({ controls, onReset }: Props) {
           <Orb />
           <Rings front />
           <HudButton label="Rotate left" step={turn(-1, 0)}>
-            <Hit x={x - 70} y={y} r={13} />
-            <Chevron x={x - 70} y={y} angle={180} />
+            <Hit x={x - CHEVRON.side} y={y} r={13} />
+            <Chevron x={x - CHEVRON.side} y={y} angle={180} />
           </HudButton>
           <HudButton label="Rotate right" step={turn(1, 0)}>
-            <Hit x={x + 70} y={y} r={13} />
-            <Chevron x={x + 70} y={y} angle={0} />
+            <Hit x={x + CHEVRON.side} y={y} r={13} />
+            <Chevron x={x + CHEVRON.side} y={y} angle={0} />
           </HudButton>
           <HudButton label="Rotate up" step={turn(0, -1)}>
-            <Hit x={x} y={y - 64} r={13} />
-            <Chevron x={x} y={y - 64} angle={-90} />
+            <Hit x={x} y={y - CHEVRON.vertical} r={13} />
+            <Chevron x={x} y={y - CHEVRON.vertical} angle={-90} />
           </HudButton>
           <HudButton label="Rotate down" step={turn(0, 1)}>
-            <Hit x={x} y={y + 64} r={13} />
-            <Chevron x={x} y={y + 64} angle={90} />
+            <Hit x={x} y={y + CHEVRON.vertical} r={13} />
+            <Chevron x={x} y={y + CHEVRON.vertical} angle={90} />
           </HudButton>
           <HudButton label="Reset view" step={onReset}>
             <Hit x={x} y={y} r={14} />
