@@ -157,7 +157,7 @@ export default function NavHud({ controls, onReset }: Props) {
   const { x, y } = ORB;
   return (
     <div
-      className="absolute bottom-4 left-1/2 -translate-x-1/2 animate-[fade-in_0.5s_ease-out]"
+      className="pointer-events-auto absolute bottom-4 left-1/2 -translate-x-1/2 animate-[fade-in_0.5s_ease-out]"
       style={{ width: HUD.width, height: HUD.height }}
     >
       <div className="absolute inset-0 glass rounded-[28px]" />

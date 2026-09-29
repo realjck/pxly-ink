@@ -58,15 +58,20 @@
 - Set a slider from script with the native `value` setter of
   `HTMLInputElement.prototype`, then dispatch `input`. Limb buttons are SVG
   `g[aria-label="Right leg"]`: dispatch a click on them (element refs go stale).
+- Drive HUD buttons with real clicks: a synthetic `pointerdown` has no active
+  pointer, so `setPointerCapture` throws and the Next dev overlay shows issues.
 - Check exact background colors by saving a screenshot and reading pixels
   (PowerShell `System.Drawing.Bitmap.GetPixel`).
 
 ## UI conventions
 
 - Colors and surfaces are tokens in `globals.css`: `ink` (text), `skin` (accent,
-  the avatar skin color), `panel` (sidebar box, as dark as the HUD), `well`
-  (recess inside the panel: drop zone, size switch). `glass` is reserved for plates
-  floating over the 3D scene (HUD).
+  the avatar skin color), `well` (#141417, recess on glass: drop zone, size switch). `glass` is for
+  plates floating over the 3D scene: the HUD and the sidebar box.
+- The scene is full screen and the sidebar floats over it (`SIDEBAR_WIDTH` in
+  `Editor.tsx`): `ViewShift` in `Viewer.tsx` moves the projection center with
+  `camera.setViewOffset` so the avatar stays centered beside it, and the viewer
+  overlays (HUD, loading) sit in a layer starting at the sidebar edge.
 - Anything `position: fixed` rendered from a panel is portaled to `document.body`
   (see `PlaceHint`): a `backdrop-filter` or `transform` on an ancestor would
   contain it.

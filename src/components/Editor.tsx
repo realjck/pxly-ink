@@ -13,6 +13,9 @@ import StencilControls from "./ui/StencilControls";
 import StencilList from "./ui/StencilList";
 import StencilUploader from "./ui/StencilUploader";
 
+/** Width (px) of the sidebar floating over the scene. */
+const SIDEBAR_WIDTH = 288;
+
 /** Top-level editor: holds stencil state, renders the 3D viewer and the UI panel. */
 export default function Editor() {
   const [stencils, setStencils] = useState<Stencil[]>([]);
@@ -49,9 +52,20 @@ export default function Editor() {
   }
 
   return (
-    <div className="flex h-screen w-screen">
-      <aside className="flex w-72 shrink-0 p-3 text-ink">
-        <div className="thin-scroll flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto rounded-[28px] border border-white/8 bg-panel p-4 shadow-[inset_0_1px_0_rgb(255_255_255/0.06)]">
+    <div className="relative h-screen w-screen">
+      <div className="absolute inset-0">
+        <Viewer
+          avatar={avatar}
+          onAvatarLoad={setAvatar}
+          stencils={stencils}
+          activeId={activeId}
+          onPlace={placeStencil}
+          leftInset={SIDEBAR_WIDTH}
+        />
+      </div>
+      {/* Floats over the scene; its margin lets clicks through to the canvas. */}
+      <aside className="pointer-events-none absolute inset-y-0 left-0 z-10 flex p-3 text-ink" style={{ width: SIDEBAR_WIDTH }}>
+        <div className="thin-scroll pointer-events-auto flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto glass rounded-[28px] p-4">
           <header className="flex items-center justify-between px-1">
             <h1 className="flex items-center gap-2 font-semibold tracking-wide">
               <span className="size-2 rounded-full bg-skin shadow-[0_0_8px_var(--color-skin)]" aria-hidden />
@@ -80,16 +94,6 @@ export default function Editor() {
           />
         </div>
       </aside>
-      {/* min-w-0: let the viewer shrink below the canvas size R3F last set. */}
-      <div className="relative min-w-0 flex-1">
-        <Viewer
-          avatar={avatar}
-          onAvatarLoad={setAvatar}
-          stencils={stencils}
-          activeId={activeId}
-          onPlace={placeStencil}
-        />
-      </div>
     </div>
   );
 }

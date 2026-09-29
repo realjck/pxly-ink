@@ -1,9 +1,9 @@
 "use client";
 
 import { OrbitControls } from "@react-three/drei";
-import { Canvas, type ThreeEvent } from "@react-three/fiber";
-import { Suspense, useRef } from "react";
-import type { Mesh } from "three";
+import { Canvas, useThree, type ThreeEvent } from "@react-three/fiber";
+import { Suspense, useLayoutEffect, useRef } from "react";
+import type { Mesh, PerspectiveCamera } from "three";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import { isPlaced } from "@/lib/stencil";
 import type { Placement, Stencil, Vec3 } from "@/types";
@@ -22,10 +22,23 @@ interface Props {
   stencils: Stencil[];
   activeId: string | null;
   onPlace: (id: string, placement: Placement) => void;
+  /** Width (px) of the panel floating over the left of the scene. */
+  leftInset: number;
 }
 
-/** Full-screen 3D scene: avatar, projected stencils and orbit controls. */
-export default function Viewer({ avatar, onAvatarLoad, stencils, activeId, onPlace }: Props) {
+/** Moves the projection center right by `shift` px, keeping the scene centered beside the panel. */
+function ViewShift({ shift }: { shift: number }) {
+  const camera = useThree((state) => state.camera) as PerspectiveCamera;
+  const { width, height } = useThree((state) => state.size);
+  useLayoutEffect(() => {
+    camera.setViewOffset(width, height, -shift, 0, width, height);
+    return () => camera.clearViewOffset();
+  }, [camera, width, height, shift]);
+  return null;
+}
+
+/** Full-screen 3D scene: avatar, projected stencils and orbit controls, centered beside the panel. */
+export default function Viewer({ avatar, onAvatarLoad, stencils, activeId, onPlace, leftInset }: Props) {
   const controls = useRef<OrbitControlsImpl>(null);
 
   function handleSurfaceClick(event: ThreeEvent<MouseEvent>) {
@@ -70,14 +83,18 @@ export default function Viewer({ avatar, onAvatarLoad, stencils, activeId, onPla
               ),
           )}
         <OrbitControls ref={controls} target={CAMERA_TARGET} makeDefault />
+        <ViewShift shift={leftInset / 2} />
       </Canvas>
-      {!avatar && (
-        <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-3 text-sm text-zinc-300">
-          <div className="size-10 animate-spin rounded-full border-4 border-zinc-600 border-t-zinc-100" />
-          Loading avatar...
-        </div>
-      )}
-      <NavHud controls={controls} onReset={resetCamera} />
+      {/* Overlays centered on the visible area, beside the panel. */}
+      <div className="pointer-events-none absolute inset-y-0 right-0" style={{ left: leftInset }}>
+        {!avatar && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-sm text-zinc-300">
+            <div className="size-10 animate-spin rounded-full border-4 border-zinc-600 border-t-zinc-100" />
+            Loading avatar...
+          </div>
+        )}
+        <NavHud controls={controls} onReset={resetCamera} />
+      </div>
     </div>
   );
 }

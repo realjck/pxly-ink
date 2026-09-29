@@ -11,8 +11,7 @@
   --color-foreground: var(--foreground);
   --color-ink: #e8e4df;
   --color-skin: #d9b8a0;
-  --color-panel: #141417;
-  --color-well: #09090b;
+  --color-well: #141417;
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
